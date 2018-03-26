@@ -1,0 +1,40 @@
+exec_once:
+ files:
+  /etc/apache2/sites-enabled/mediawiki.conf:
+    name: mediawiki.conf
+    path: /etc/apache2/sites-enabled/
+    mode: "0644"
+    owner: root
+    group: root
+    content: |
+      <VirtualHost *:80>
+        DocumentRoot /var/www/html/mediawiki
+        <Directory /var/www/html/mediawiki>
+          Options Indexes FollowSymLinks MultiViews
+          AllowOverride none
+          Order allow,deny
+          allow from all
+        </Directory>
+
+        CustomLog /var/log/apache2/access.log combined
+        ErrorLog /var/log/apache2/error.log
+
+      </VirtualHost>
+ execs:
+  Remove default apache config file:
+   name: Remove default apache config file
+   command: |
+     rm -f /etc/apache2/sites-enabled/000-default.conf
+  Get mediawiki source:
+   name: Get mediawiki source
+   command: |
+     wget -qO- https://releases.wikimedia.org/mediawiki/1.30/mediawiki-1.30.0.tar.gz | tar xvz  -C . --strip 1
+
+post_app_deploy:
+ execs:
+  Restart apache:
+   name: Restart apache
+   command: |
+     #!/usr/bin/env bash
+     chown -RL www-data:www-data /var/www/html/mediawiki
+     service apache2 restart
