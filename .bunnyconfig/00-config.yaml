@@ -1,4 +1,5 @@
 pre_app_deploy:
+ execs:
   Get mediawiki source:
    name: Get mediawiki source
    command: |
